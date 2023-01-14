@@ -1,0 +1,29 @@
+#### Vue CLI 的运行原理
+
+![image-20221206103404280](D:%5Cworkspace%5CQiLongZhang%5CVue%5CQ7Long%5CVue3%5C%E7%AC%94%E8%AE%B0%5C11_Vite3%E6%96%B0%E5%A2%9E%E8%AF%AD%E6%B3%95%E7%89%B9%E6%80%A7%EF%BC%88%E2%BC%86%EF%BC%89.assets%5Cimage-20221206103404280.png)
+
+```js
+// 1. 局部安装 vite
+npm install vite -D
+
+// 使用 vite 启动项目  
+npx vite 
+
+// vite默认就会对css进行处理
+// 但是我们使用less的时候，我们也需要进行安装less工具
+npm install less -D
+
+// 安装 vite 脚手架
+npm install @vitejs/create-app -g 
+
+// 利用 vite 脚手架创建项目
+
+create-app  vite_cli_demo
+
+选择 vue
+选择 vue-ts
+
+// 但是没有安装依赖，执行 npm inatll 
+npm install 
+```
+

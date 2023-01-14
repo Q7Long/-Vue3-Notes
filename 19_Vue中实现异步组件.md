@@ -1,0 +1,114 @@
+### Vue中实现异步组件
+
+```js
+// 如果我们不采用分包的话，那么我们打包之后都放进app.js文件的话，那么所有的组件都会存入 app.js 中，那么这个 app.js 就会越来越大
+// 或者我们可以将进入页面不需要加载的页面进行分包处理，这样可以加快加载页面的速度
+```
+
+```js
+// utils/math.js
+export function sum (num1, num2) {
+	return num1 + num2
+}
+```
+```js
+// main.js
+import { createApp } from 'vue'
+import App from './19_异步组件的使用/App.vue'
+
+// 通过 import 函数导入的模块，后缀webpack对其打包的时候就会进行分包的操作，就不会打包到app.js中
+import("./19_异步组件的使用/utils/math").then(res=>{
+	console.log(res.sum(20,30))
+})
+createApp(App).mount('#app')
+```
+
+- 如果我们的项目太大了，对于某些组件我们希望通过异步的方式来进行加载(目的是可以对其进行分包处理)，那么Vue中给我们提供了一个函数:defineAsyncComponent
+- defineAsyncComponent接收两种类型的参数
+  - 类型一：工厂函数，该工厂函数需要返回一个promise对象
+
+比如：
+
+```javascript
+//1. import {defineAsyncComponent} from 'vue' 可以帮助我们定义一个异步组件
+import { defineAsyncComponent } from 'vue'
+// 2. 创建一个异步组件，希望分包
+const AsyncCategory = defineAsyncComponent(() => import('./views/Category.vue'))
+export default {
+  components: {
+    Category: AsyncCategory
+  }
+}
+```
+
+![image-20221206193713556](D:%5Cworkspace%5CQiLongZhang%5CVue%5CQ7Long%5CVue3%5C%E7%AC%94%E8%AE%B0%5C19_Vue%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%BC%82%E6%AD%A5%E7%BB%84%E4%BB%B6.assets%5Cimage-20221206193713556.png)
+
+**这样就可以分包处理了**
+
+  - 类型二：接收一个对象类型，对异步函数进行配置
+
+![Vue中实现异步组件](D:/workspace/QiLongZhang/Vue/Q7Long/LEARN%2520VUEJS/03_learn_component/src/img/Vue%25E4%25B8%25AD%25E5%25AE%259E%25E7%258E%25B0%25E5%25BC%2582%25E6%25AD%25A5%25E7%25BB%2584%25E4%25BB%25B6.png)
+***但是后期我们就会用一种叫做路由懒加载的东西来替换异步组件***
+
+```vue
+<template>
+  <div class="app">
+    <div class="tabs">
+      <template v-for="(item,index) in tabs"
+                :key="item">
+        <button :class="{active:currentTab===item}"
+                @click="itemClick(item)">{{item}}</button>
+      </template>
+    </div>
+    <div class="view">
+      <keep-alive include="home"
+                  exclude="about"
+                  max="1">
+        <component :is="currentTab"></component>
+      </keep-alive>
+    </div>
+  </div>
+</template>
+<script>
+// 如果我们希望我们的category放在我们的components里面注册
+// 该如何做呢？ 不可以使用 const Category = import("./views/Category.vue")
+// 因为这样返回的是一个 promise 因为 components 里面要求是放入的组件，但是上面的就是一个promise对象
+
+//1. import {defineAsyncComponent} from 'vue' 可以帮助我们定义一个异步组件
+import { defineAsyncComponent } from 'vue'
+import About from './views/About.vue';
+// import Category from './views/Category.vue';
+import Home from './views/Home.vue'
+// 2. 创建一个异步组件，希望分包
+const AsyncCategory = defineAsyncComponent(() => import('./views/Category.vue'))
+export default {
+  components: {
+    About,
+    // Category
+    Home,
+    Category: AsyncCategory
+  },
+  data () {
+    return {
+      tabs: ["home", "about", "category"],
+      currentTab: 'Home'
+    }
+  },
+  methods: {
+    itemClick (item) {
+      this.currentTab = item
+    },
+    homeClick (payload) {
+      console.log("homeClick", payload)
+    }
+  }
+}
+</script>
+<style scoped>
+.active {
+  color: red;
+  font-weight: 700;
+}
+</style>
+```
+
